@@ -1,0 +1,388 @@
+/* Fountain Navigator - Obsidian Outline Style */
+.fountain-navigator-container {
+    padding: 0;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--background-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header with toggle buttons */
+.fountain-nav-header {
+    display: flex;
+    gap: 2px;
+    padding: 6px 4px 4px 4px;
+    background-color: var(--background-primary);
+    flex-shrink: 0;
+}
+
+.fountain-nav-header * {
+    filter: none !important;
+    box-shadow: none !important;
+    -webkit-filter: none !important;
+    text-shadow: none !important;
+}
+
+.fountain-nav-toggle {
+    padding: 5px 6px;
+    border-radius: var(--radius-s);
+    border: none;
+    background-color: transparent;
+    color: var(--icon-color);
+    cursor: pointer;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    filter: none;
+    opacity: 0.5;
+}
+
+.fountain-nav-toggle svg {
+    width: 16px;
+    height: 16px;
+    filter: none !important;
+    box-shadow: none !important;
+    -webkit-filter: none !important;
+    color: inherit;
+}
+
+.fountain-nav-toggle:hover {
+    opacity: 1;
+}
+
+.fountain-nav-toggle.is-active {
+    background-color: var(--background-modifier-hover);
+    opacity: 1;
+}
+
+.fountain-nav-content {
+    padding: 4px 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.fountain-nav-empty {
+    padding: 20px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: var(--font-ui-small);
+}
+
+.fountain-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fountain-nav-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: var(--font-ui-small);
+    color: var(--text-normal);
+    border-radius: var(--radius-s);
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    transition: background-color 0.1s ease;
+}
+
+.fountain-nav-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.fountain-nav-item:active {
+    background-color: var(--background-modifier-active);
+}
+
+.fountain-nav-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.fountain-nav-heading {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: var(--line-height-tight);
+    display: flex;
+    align-items: baseline;
+    position: relative;
+}
+
+.fountain-scene-number {
+    color: var(--text-muted);
+    font-weight: var(--font-normal);
+    font-size: var(--font-ui-small);
+    display: inline-block;
+    transition: opacity 0.2s ease, max-width 0.2s ease, margin-right 0.2s ease;
+    max-width: 50px;
+    margin-right: 0;
+    opacity: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.fountain-heading-text {
+    margin-left: 0.25em;
+}
+
+.hide-scene-numbers .fountain-heading-text {
+    margin-left: 0;
+}
+
+.hide-scene-numbers .fountain-scene-number {
+    opacity: 0;
+    max-width: 0;
+    margin-right: 0;
+}
+
+.fountain-task-indicator {
+    margin-left: auto;
+    padding-left: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    line-height: 1.2;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.hide-tasks .fountain-task-indicator {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fountain-task-indicator svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-accent);
+    fill: none;
+    stroke: var(--text-accent);
+    stroke-width: 2;
+    filter: none !important;
+    box-shadow: none !important;
+    -webkit-filter: none !important;
+}
+
+.fountain-nav-preview {
+    color: var(--text-faint);
+    font-size: var(--font-ui-smaller);
+    line-height: 1.3;
+    margin-top: 1px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 50px;
+    opacity: 1;
+    transition: max-height 0.2s ease, margin-top 0.2s ease, opacity 0.2s ease;
+}
+
+.hide-preview .fountain-nav-preview {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.fountain-nav-characters {
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+    line-height: var(--line-height-tight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+    max-height: 30px;
+    opacity: 1;
+    transition: max-height 0.2s ease, margin-top 0.2s ease, opacity 0.2s ease;
+}
+
+.hide-characters .fountain-nav-characters {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.fountain-nav-characters-label {
+    display: none;
+}
+
+.fountain-nav-tasks {
+    margin-top: 2px;
+    max-height: 500px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.2s ease, margin-top 0.2s ease, opacity 0.2s ease;
+}
+
+.fountain-nav-tasks:empty {
+    margin-top: 0;
+    max-height: 0;
+    opacity: 0;
+}
+
+.hide-tasks .fountain-nav-tasks {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.fountain-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.fountain-task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    font-size: var(--font-ui-smaller);
+    line-height: 1.2;
+    padding: 2px 4px;
+    margin-left: -4px;
+    border-radius: var(--radius-s);
+    transition: background-color 0.1s ease;
+}
+
+.fountain-task-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.fountain-task-item:active {
+    background-color: var(--background-modifier-active);
+}
+
+.fountain-task-checkbox {
+    flex-shrink: 0;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--text-accent);
+}
+
+.fountain-task-text {
+    flex: 1;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    color: var(--text-accent);
+    line-height: 1.2;
+}
+
+.fountain-task-checked .fountain-task-text {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.fountain-task-checked .fountain-task-checkbox {
+    opacity: 0.5;
+}
+
+/* Scene headings */
+.fountain-scene {
+    font-weight: var(--font-normal);
+    color: var(--text-normal);
+}
+
+/* Section headings */
+.fountain-section {
+    font-weight: var(--font-semibold);
+    color: var(--text-normal);
+    margin-top: 2px;
+}
+
+.fountain-section .fountain-nav-item-content {
+    gap: 0;
+}
+
+/* Synopsis */
+.fountain-synopsis {
+    font-style: italic;
+    color: var(--text-muted);
+    padding-left: 16px;
+}
+
+.fountain-synopsis .fountain-nav-item-content {
+    gap: 0;
+}
+
+/* Notes */
+.fountain-note {
+    color: var(--text-muted);
+    padding-left: 16px;
+    font-size: var(--font-ui-smaller);
+}
+
+.fountain-note .fountain-nav-item-content {
+    gap: 0;
+}
+
+/* Drag states */
+.fountain-scene[draggable="true"] {
+    cursor: grab;
+}
+
+.fountain-scene[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.fountain-dragging {
+    opacity: 0.5;
+    background-color: var(--background-modifier-hover);
+}
+
+/* Drop indicators */
+.fountain-drop-before {
+    border-top: 2px solid var(--text-accent);
+}
+
+.fountain-drop-after {
+    border-bottom: 2px solid var(--text-accent);
+}
+
+/* Spacing */
+.fountain-section + .fountain-scene {
+    margin-top: 2px;
+}
+
+/* Scrollbar */
+.fountain-navigator-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fountain-navigator-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fountain-navigator-container::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 4px;
+}
+
+.fountain-navigator-container::-webkit-scrollbar-thumb:hover {
+    background: var(--background-modifier-border-hover);
+}
+
+/* Scrollbar for content area */
+.fountain-nav-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fountain-nav-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fountain-nav-content::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 4px;
+}
+
+.fountain-nav-content::-webkit-scrollbar-thumb:hover {
+    background: var(--background-modifier-border-hover);
+}
