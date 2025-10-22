@@ -14,6 +14,8 @@ class FountainNavigatorView extends ItemView {
         this.savedScrollPosition = null;
         this.scrollContainer = null;
         this.mouseDownTime = 0;
+        this.debounceTimer = null;
+        this.currentSceneLine = -1;
         // Toggle states - default: Preview ON, rest OFF
         this.showCharacters = false;
         this.showPreview = true;
@@ -110,17 +112,31 @@ class FountainNavigatorView extends ItemView {
             this.app.workspace.on('active-leaf-change', (leaf) => {
                 if (leaf && leaf.view instanceof MarkdownView) {
                     this.lastActiveLeaf = leaf;
+                    this.updateCurrentSceneHighlight(leaf.view.editor);
                 }
                 this.update();
             })
         );
-        
+
         this.registerEvent(
             this.app.workspace.on('file-open', () => this.update())
         );
-        
+
         this.registerEvent(
             this.app.metadataCache.on('changed', () => this.update())
+        );
+
+        // Editor change listener with debouncing for faster updates
+        this.registerEvent(
+            this.app.workspace.on('editor-change', (editor) => {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.update();
+                }, 300); // Update after 300ms of no typing
+
+                // Update current scene highlight immediately (no debounce for visual feedback)
+                this.updateCurrentSceneHighlight(editor);
+            })
         );
 
         this.update();
@@ -215,8 +231,13 @@ class FountainNavigatorView extends ItemView {
             this.scenes = newScenes;
             this.navContainer.empty();
             this.renderScenes();
+
+            // Update current scene highlight after rendering
+            if (view.editor) {
+                this.updateCurrentSceneHighlight(view.editor);
+            }
         }
-        
+
         // Always restore scroll position
         if (this.scrollContainer) {
             requestAnimationFrame(() => {
@@ -225,8 +246,38 @@ class FountainNavigatorView extends ItemView {
                 }
             });
         }
-        
+
         this.isUpdating = false;
+    }
+
+    updateCurrentSceneHighlight(editor) {
+        if (!editor) return;
+
+        const cursor = editor.getCursor();
+        const cursorLine = cursor.line;
+
+        // Only update if cursor line changed
+        if (this.currentSceneLine === cursorLine) return;
+        this.currentSceneLine = cursorLine;
+
+        // Find which scene the cursor is in
+        let currentSceneIndex = -1;
+        for (let i = this.scenes.length - 1; i >= 0; i--) {
+            if (this.scenes[i].line <= cursorLine) {
+                currentSceneIndex = i;
+                break;
+            }
+        }
+
+        // Update highlights
+        const items = this.navContainer.querySelectorAll('.fountain-nav-item');
+        items.forEach((item, index) => {
+            if (index === currentSceneIndex) {
+                item.addClass('fountain-nav-item-current');
+            } else {
+                item.removeClass('fountain-nav-item-current');
+            }
+        });
     }
 
     parseFountain(content) {

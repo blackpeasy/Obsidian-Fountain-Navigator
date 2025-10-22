@@ -98,6 +98,11 @@
     background-color: var(--background-modifier-active);
 }
 
+/* Current scene highlight (where cursor is) */
+.fountain-nav-item-current {
+    background-color: var(--background-modifier-hover);
+}
+
 .fountain-nav-item-content {
     display: flex;
     flex-direction: column;
