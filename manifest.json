@@ -1,7 +1,7 @@
 {
     "id": "fountain-navigator",
     "name": "Fountain Navigator",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minAppVersion": "0.15.0",
     "description": "Navigate your Fountain screenplays with an outline view showing scenes, sections, and synopses. Drag and drop to reorder scenes.",
     "author": "Your Name",

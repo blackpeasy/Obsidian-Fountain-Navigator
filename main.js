@@ -15,7 +15,8 @@ class FountainNavigatorView extends ItemView {
         this.scrollContainer = null;
         this.mouseDownTime = 0;
         this.debounceTimer = null;
-        this.currentSceneLine = -1;
+        this.currentSceneIndex = -1;
+        this.cursorCheckInterval = null;
         // Toggle states - default: Preview ON, rest OFF
         this.showCharacters = false;
         this.showPreview = true;
@@ -139,21 +140,57 @@ class FountainNavigatorView extends ItemView {
             })
         );
 
+        // Add polling interval to check cursor position every 200ms
+        // This ensures instant updates when moving cursor without typing
+        this.cursorCheckInterval = window.setInterval(() => {
+            const view = this.getActiveMarkdownView();
+            if (view && view.editor) {
+                this.updateCurrentSceneHighlight(view.editor);
+            }
+        }, 200);
+
         this.update();
     }
 
-    getActiveMarkdownView() {
-        if (this.lastActiveLeaf && this.lastActiveLeaf.view instanceof MarkdownView) {
-            return this.lastActiveLeaf.view;
+    async onClose() {
+        // Clean up the cursor check interval
+        if (this.cursorCheckInterval) {
+            window.clearInterval(this.cursorCheckInterval);
+            this.cursorCheckInterval = null;
         }
-        
+
+        // Clean up debounce timer
+        if (this.debounceTimer) {
+            clearTimeout(this.debounceTimer);
+            this.debounceTimer = null;
+        }
+    }
+
+    getActiveMarkdownView() {
+        // Always prefer the actual active view from workspace
         const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (activeView) {
+            // Update lastActiveLeaf to keep it in sync
+            const activeLeaf = this.app.workspace.getLeaf(false);
+            if (activeLeaf && activeLeaf.view instanceof MarkdownView) {
+                this.lastActiveLeaf = activeLeaf;
+            }
             return activeView;
         }
 
+        // Fallback to lastActiveLeaf only if it's still valid
+        if (this.lastActiveLeaf && this.lastActiveLeaf.view instanceof MarkdownView) {
+            const view = this.lastActiveLeaf.view;
+            // Verify the view is still attached and has a file
+            if (view.file && view.editor) {
+                return view;
+            }
+        }
+
+        // Last resort: find any markdown leaf
         const leaves = this.app.workspace.getLeavesOfType('markdown');
         if (leaves.length > 0 && leaves[0].view instanceof MarkdownView) {
+            this.lastActiveLeaf = leaves[0];
             return leaves[0].view;
         }
 
@@ -191,14 +228,25 @@ class FountainNavigatorView extends ItemView {
         const fileChanged = this.currentFile?.path !== view.file.path;
         this.currentFile = view.file;
 
+        // Get fresh cache and check for fountain class
         const cache = this.app.metadataCache.getFileCache(view.file);
-        const isFountain = cache?.frontmatter?.cssclasses?.includes('fountain');
-        
+        let isFountain = false;
+
+        if (cache?.frontmatter?.cssclasses) {
+            const cssclasses = cache.frontmatter.cssclasses;
+            // Handle both string and array formats
+            if (typeof cssclasses === 'string') {
+                isFountain = cssclasses === 'fountain';
+            } else if (Array.isArray(cssclasses)) {
+                isFountain = cssclasses.includes('fountain');
+            }
+        }
+
         if (!isFountain) {
             this.navContainer.empty();
-            this.navContainer.createDiv({ 
-                text: 'Add "cssclasses: fountain" to frontmatter', 
-                cls: 'fountain-nav-empty' 
+            this.navContainer.createDiv({
+                text: 'Add "cssclasses: fountain" to frontmatter',
+                cls: 'fountain-nav-empty'
             });
             this.isUpdating = false;
             return;
@@ -232,7 +280,8 @@ class FountainNavigatorView extends ItemView {
             this.navContainer.empty();
             this.renderScenes();
 
-            // Update current scene highlight after rendering
+            // Reset and update current scene highlight after rendering
+            this.currentSceneIndex = -1; // Force update on next check
             if (view.editor) {
                 this.updateCurrentSceneHighlight(view.editor);
             }
@@ -253,31 +302,37 @@ class FountainNavigatorView extends ItemView {
     updateCurrentSceneHighlight(editor) {
         if (!editor) return;
 
-        const cursor = editor.getCursor();
-        const cursorLine = cursor.line;
+        try {
+            const cursor = editor.getCursor();
+            if (!cursor) return;
 
-        // Only update if cursor line changed
-        if (this.currentSceneLine === cursorLine) return;
-        this.currentSceneLine = cursorLine;
+            const cursorLine = cursor.line;
 
-        // Find which scene the cursor is in
-        let currentSceneIndex = -1;
-        for (let i = this.scenes.length - 1; i >= 0; i--) {
-            if (this.scenes[i].line <= cursorLine) {
-                currentSceneIndex = i;
-                break;
+            // Find which scene the cursor is in
+            let currentSceneIndex = -1;
+            for (let i = this.scenes.length - 1; i >= 0; i--) {
+                if (this.scenes[i].line <= cursorLine) {
+                    currentSceneIndex = i;
+                    break;
+                }
             }
+
+            // Only update DOM if the scene changed
+            if (this.currentSceneIndex === currentSceneIndex) return;
+            this.currentSceneIndex = currentSceneIndex;
+
+            // Update highlights efficiently
+            const items = this.navContainer.querySelectorAll('.fountain-nav-item');
+            items.forEach((item, index) => {
+                if (index === currentSceneIndex) {
+                    item.addClass('fountain-nav-item-current');
+                } else {
+                    item.removeClass('fountain-nav-item-current');
+                }
+            });
+        } catch (e) {
+            // Silently ignore errors to prevent console spam during rapid updates
         }
-
-        // Update highlights
-        const items = this.navContainer.querySelectorAll('.fountain-nav-item');
-        items.forEach((item, index) => {
-            if (index === currentSceneIndex) {
-                item.addClass('fountain-nav-item-current');
-            } else {
-                item.removeClass('fountain-nav-item-current');
-            }
-        });
     }
 
     parseFountain(content) {
